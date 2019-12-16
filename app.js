@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
+const os = require("os");
+const {Client} = require("pg");
 const puppeteer = require("puppeteer");
 
-(async () => {
+async function scrape() {
   const browser = await puppeteer.launch();
   const page = await browser.newPage()
   await page.setViewport({ width: 1280, height: 1800 })
@@ -20,11 +22,25 @@ const puppeteer = require("puppeteer");
   await page.goto("https://www.three.co.uk/New_My3/Data_allowance?id=My3_DataAllowanceHeading");
 
   // grab balance
-  const remaining_data = await page.evaluate(
+  const remaining_data_mb = await page.evaluate(
     sel => parseInt(document.querySelector(sel).innerHTML),
     "#pl-top > div.threePortlet.P30_id.P30_checkMyBalance_w2 > table > tbody:nth-child(3) > tr > td.alignRight");
 
-  console.log({remaining_data});
+  console.log({remaining_data_mb});
+  await insert_pg(remaining_data_mb);
 
   await browser.close()
-})();
+}
+
+async function insert_pg(remaining_data_mb) {
+  const client = new Client()
+  await client.connect()
+
+  const host = `${os.userInfo().username}@${os.hostname()}`;
+  const res = await client.query(
+    "INSERT INTO acpi_log (host, cmd, content) VALUES ($1, '$2', '$3')",
+    [host, "three.co.uk remaining data balance", {remaining_data_mb}]
+  );
+
+  await client.end()
+}
