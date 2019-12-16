@@ -20,7 +20,6 @@ const puppeteer = require("puppeteer");
   await page.goto("https://www.three.co.uk/New_My3/Data_allowance?id=My3_DataAllowanceHeading");
 
   // grab balance
-  await page.waitForNavigation();
   const remaining_data = await page.evaluate(
     sel => parseInt(document.querySelector(sel).innerHTML),
     "#pl-top > div.threePortlet.P30_id.P30_checkMyBalance_w2 > table > tbody:nth-child(3) > tr > td.alignRight");
