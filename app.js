@@ -4,6 +4,8 @@ const os = require("os");
 const {Client} = require("pg");
 const puppeteer = require("puppeteer");
 
+const launched_at = new Date().getTime() / 1000;
+
 async function scrape() {
   console.log("Launching browser...");
   const browser = await puppeteer.launch();
@@ -30,21 +32,22 @@ async function scrape() {
     "#pl-top > div.threePortlet.P30_id.P30_checkMyBalance_w2 > table > tbody:nth-child(3) > tr > td.alignRight");
 
   console.log("Inserting into Postgres...");
-  console.log({remaining_data_mb});
-  await insert_pg(remaining_data_mb);
+  const content = {remaining_data_mb, launched_at};
+  console.log(content);
+  await insert_pg(content);
 
   console.log("Closing browser...");
   await browser.close()
 }
 
-async function insert_pg(remaining_data_mb) {
+async function insert_pg(content) {
   const client = new Client()
   await client.connect()
 
   const host = `${os.userInfo().username}@${os.hostname()}`;
   const res = await client.query(
     "INSERT INTO acpi_log (host, cmd, content) VALUES ($1, $2, $3)",
-    [host, "three.co.uk remaining data balance", {remaining_data_mb}]
+    [host, "three.co.uk remaining data balance", content]
   );
 
   await client.end()
