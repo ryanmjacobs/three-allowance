@@ -8,7 +8,7 @@ const launched_at = new Date().getTime() / 1000;
 
 async function scrape() {
   console.log("Launching browser...");
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({headless:true});
 
   console.log("Opening page...");
   const page = await browser.newPage()
