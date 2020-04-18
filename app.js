@@ -13,11 +13,13 @@ async function scrape() {
   console.log("Opening page...");
   const page = await browser.newPage()
   await page.setViewport({ width: 1280, height: 1800 })
-  await page.goto("https://www.three.co.uk/My3Account2018/My3Login");
+  await page.goto("https://new.three.co.uk/account/login");
 
   console.log("Signing in...");
-  await page.click("#my3_login_form > label > span > input");
+  await page.click("#MSISDN");
   await page.keyboard.type(process.env.THREE_ID);
+  await page.click("#login-next-msisdn");
+  await page.waitForNavigation();
   await page.click("#my3_login_form > div.magicpassword > label:nth-child(1) > input");
   await page.keyboard.type(process.env.THREE_PASSWORD);
   await page.click("#my3-login-submit");
